@@ -7,6 +7,7 @@ export default function HomePage() {
   const [account, setAccount] = useState(undefined);
   const [atm, setATM] = useState(undefined);
   const [balance, setBalance] = useState(undefined);
+  const [amtOfTransactions, setAmtOfTransactions] = useState(undefined);
 
   const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
   const atmABI = atm_abi.abi;
@@ -58,20 +59,27 @@ export default function HomePage() {
       setBalance((await atm.getBalance()).toNumber());
     }
   }
+  const getAmtOfTransactions = async() => {
+    if (atm) {
+      setAmtOfTransactions((await atm.getAmountOfTransactions()).toNumber());
+    }
+  }
 
   const deposit = async() => {
     if (atm) {
       let tx = await atm.deposit(1);
-      await tx.wait()
+      await tx.wait();
       getBalance();
+      getAmtOfTransactions();
     }
   }
 
   const withdraw = async() => {
     if (atm) {
       let tx = await atm.withdraw(1);
-      await tx.wait()
+      await tx.wait();
       getBalance();
+      getAmtOfTransactions();
     }
   }
 
@@ -88,12 +96,14 @@ export default function HomePage() {
 
     if (balance == undefined) {
       getBalance();
+      getAmtOfTransactions();
     }
 
     return (
       <div>
         <p>Your Account: {account}</p>
         <p>Your Balance: {balance}</p>
+        <p>Amount Of Transactions Done: {amtOfTransactions}</p>
         <button onClick={deposit}>Deposit 1 ETH</button>
         <button onClick={withdraw}>Withdraw 1 ETH</button>
       </div>
