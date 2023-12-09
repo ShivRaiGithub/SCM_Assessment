@@ -6,10 +6,12 @@ export default function HomePage() {
   const [ethWallet, setEthWallet] = useState(undefined);
   const [account, setAccount] = useState(undefined);
   const [atm, setATM] = useState(undefined);
-  const [balance, setBalance] = useState(undefined);
-  const [amtOfTransactions, setAmtOfTransactions] = useState(undefined);
 
-  const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+  const [totalParticipants, setTotalParticipants]=useState(undefined);
+  const [totalFunds, setTotalFunds]=useState(undefined);
+  const [userDonation, setUserDonation]=useState(undefined);
+
+  const contractAddress = "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318";
   const atmABI = atm_abi.abi;
 
   const getWallet = async() => {
@@ -54,32 +56,29 @@ export default function HomePage() {
     setATM(atmContract);
   }
 
-  const getBalance = async() => {
+  const getTotalParticipants = async() => {
     if (atm) {
-      setBalance((await atm.getBalance()).toNumber());
+      setTotalParticipants((await atm.getTotalParticipants()).toNumber());
     }
   }
-  const getAmtOfTransactions = async() => {
+  const getTotalFunds = async() => {
     if (atm) {
-      setAmtOfTransactions((await atm.getAmountOfTransactions()).toNumber());
+      setTotalFunds((await atm.getTotalFunds()).toNumber());
     }
   }
-
-  const deposit = async() => {
+  const getUserDonations = async() => {
     if (atm) {
-      let tx = await atm.deposit(1);
-      await tx.wait();
-      getBalance();
-      getAmtOfTransactions();
+      setUserDonation((await atm.getUserDonations()).toNumber());
     }
   }
 
-  const withdraw = async() => {
+  const donate = async() => {
     if (atm) {
-      let tx = await atm.withdraw(1);
+      let tx = await atm.donate();
       await tx.wait();
-      getBalance();
-      getAmtOfTransactions();
+      getTotalFunds();
+      getTotalParticipants();
+      getUserDonations();
     }
   }
 
@@ -94,18 +93,18 @@ export default function HomePage() {
       return <button onClick={connectAccount}>Please connect your Metamask wallet</button>
     }
 
-    if (balance == undefined) {
-      getBalance();
-      getAmtOfTransactions();
+    if (totalFunds == undefined || totalParticipants==undefined || userDonation==undefined) {
+      getTotalFunds();
+      getTotalParticipants();
+      getUserDonations()
     }
 
     return (
       <div>
-        <p>Your Account: {account}</p>
-        <p>Your Balance: {balance}</p>
-        <p>Amount Of Transactions Done: {amtOfTransactions}</p>
-        <button onClick={deposit}>Deposit 1 ETH</button>
-        <button onClick={withdraw}>Withdraw 1 ETH</button>
+        <p>Your Contribution: {userDonation}</p>
+        <p>Total Contribution: {totalFunds}</p>
+        <p>Total Participants: {totalParticipants}</p>
+        <button onClick={() => donate()}>Donate an ETH</button>
       </div>
     )
   }
@@ -114,7 +113,7 @@ export default function HomePage() {
 
   return (
     <main className="container">
-      <header><h1>Welcome to the Metacrafters ATM!</h1></header>
+      <header><h1>Fundraiser</h1></header>
       {initUser()}
       <style jsx>{`
         .container {

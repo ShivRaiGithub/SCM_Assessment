@@ -1,43 +1,37 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.17;
 
 contract Assessment {
-   address payable public owner;
-   uint256 public balance;
-   uint256 amountOfTransactions;
+    address owner;
+    uint256 totalFunds;
 
-   event Deposit(uint256 amount);
-   event Withdraw(uint256 amount);
+    mapping(address => uint256) public contributions;
+    address[] public participants;
 
-   constructor(uint initBalance) payable {
-       owner = payable(msg.sender);
-       balance = initBalance;
-       amountOfTransactions=0;
-   }
+    constructor() {
+        owner = msg.sender;
+    }
 
-   function getBalance() public view returns(uint256){
-       return balance;
-   }
+    function donate() public {
+        if (contributions[msg.sender] == 0) {
+            participants.push(msg.sender);
+        }
+        contributions[msg.sender] += 1;
+        totalFunds+=1;
+    }
 
-   function deposit(uint256 _amount) public payable {
-       require(msg.sender == owner, "You are not the owner of this account");
-       require(msg.value == _amount, "Incorrect deposit amount");
-       balance += _amount;
-       amountOfTransactions++;
-       emit Deposit(_amount);
-   }
+    function getTotalParticipants() public view returns (uint256) {
+        return participants.length;
+    }
 
-   error InsufficientBalance(uint256 balance, uint256 withdrawAmount);
+    function getTotalFunds() public view returns (uint256) {
+        return totalFunds;
+    }
 
-   function withdraw(uint256 _withdrawAmount) public {
-       require(msg.sender == owner, "You are not the owner of this account");
-       require(balance >= _withdrawAmount, "Insufficient balance");
-       balance -= _withdrawAmount;
-       amountOfTransactions++;
-       emit Withdraw(_withdrawAmount);
-   }
-
-   function getAmountOfTransactions() public view returns(uint256){
-       return amountOfTransactions;
-   }
+    function getUserDonations() public view returns (uint256) {
+        return contributions[msg.sender];
+    }
+    fallback() external{
+        donate();
+    }
 }
